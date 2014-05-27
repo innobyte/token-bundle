@@ -1,0 +1,13 @@
+parameters:
+    innobyte_token.token.class: Innobyte\TokenBundle\Service\TokenService
+
+services:
+    innobyte_token.token:
+        class: %innobyte_token.token.class%
+        arguments:
+            - @service_container
+            - %innobyte_token.entity_manager_service_name%
+        lazy: true
+
+    innobyte_token:
+        alias: innobyte_token.token
