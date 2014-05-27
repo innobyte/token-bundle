@@ -1,4 +1,46 @@
-# Generate token
+# Installation
+
+## composer.json - install bundle
+
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "ssh://git@gitlab.devops.innobyte.ro/sorin.dumitrescu/token-bundle.git"
+        }
+    ],
+    "require": {
+        "innobyte/token-bundle": "@dev",
+    },
+
+## AppKernel.php - register bundle
+
+Add the following line into `$bundles` array:
+
+    new Innobyte\TokenBundle\InnobyteTokenBundle(),
+
+## config.yml - Add bundle mapping
+
+Add the mapping for the bundle under an entity manager (here "default")
+
+    doctrine:
+        orm:
+            entity_managers:
+                default:
+                    mappings:
+                        InnobyteTokenBundle: ~
+
+## paramaters.yml - Add the entity manager name
+
+Add the entity manager name (here "local") - the one you put the mapping under in the above step.
+If none is provided, "default" will be used.
+
+    innobyte_token:
+        entity_manager: local
+
+
+# Usage
+
+## Generate token
 
     /** @var Token $token */
     $token = $this->get('innobyte_token')->generate(
@@ -7,7 +49,7 @@
         123            // owner_id
     );
 
-# Validate token and consume it
+## Validate token and consume it
     $validToken = $this->get('innobyte_token')->consume(
         '5c15e262c692dbaac75451dcb28282ab',
         'scope',
@@ -21,7 +63,7 @@
         echo 'do stuff here...';
     }
 
-# Get the token and manually validate it
+## Get the token and manually validate it
     $token = $this->get('innobyte_token')->get(
         '5c15e262c692dbaac75451dcb28282ab',
         'scope',
