@@ -1,16 +1,8 @@
 # Installation
 
-## composer.json - install bundle
+## Using composer
 
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "git@github.com:innobyte/token-bundle.git"
-        }
-    ],
-    "require": {
-        "innobyte/token-bundle": "@dev",
-    },
+    php composer.phar require innobyte/token-bundle "1.0.*@dev"
 
 ## AppKernel.php - register bundle
 
