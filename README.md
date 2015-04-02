@@ -5,7 +5,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "ssh://git@gitlab.devops.innobyte.ro/sorin.dumitrescu/token-bundle.git"
+            "url": "git@github.com:innobyte/token-bundle.git"
         }
     ],
     "require": {
