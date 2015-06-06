@@ -2,14 +2,15 @@
 
 namespace Innobyte\TokenBundle\Entity;
 
+use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping as ORM;
-use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * Token
  *
  * @ORM\Table("token")
  * @ORM\Entity(repositoryClass="Innobyte\TokenBundle\Repository\TokenRepository")
+ * @ORM\HasLifecycleCallbacks
  */
 class Token
 {
@@ -81,7 +82,6 @@ class Token
     /**
      * @var \DateTime
      *
-     * @Gedmo\Timestampable(on="create")
      * @ORM\Column(name="created_at", type="datetime")
      */
     protected $createdAt;
@@ -89,7 +89,6 @@ class Token
     /**
      * @var \DateTime
      *
-     * @Gedmo\Timestampable(on="update")
      * @ORM\Column(name="modified_at", type="datetime")
      */
     protected $modifiedAt;
@@ -313,6 +312,20 @@ class Token
     }
 
     /**
+     * Set createdAt
+     *
+     * @param \DateTime $createdAt
+     *
+     * @return $this
+     */
+    public function setCreatedAt(\DateTime $createdAt)
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    /**
      * Get createdAt
      *
      * @return \DateTime
@@ -320,6 +333,20 @@ class Token
     public function getCreatedAt()
     {
         return $this->createdAt;
+    }
+
+    /**
+     * Set modifiedAt
+     *
+     * @param \DateTime $modifiedAt
+     *
+     * @return $this
+     */
+    public function setModifiedAt(\DateTime $modifiedAt)
+    {
+        $this->modifiedAt = $modifiedAt;
+
+        return $this;
     }
 
     /**
@@ -354,5 +381,35 @@ class Token
     public function getExpiresAt()
     {
         return $this->expiresAt;
+    }
+
+    /**
+     * Called before saving for the first time
+     *
+     * @ORM\PrePersist
+     *
+     * @param LifecycleEventArgs $event
+     */
+    public function prePersist(LifecycleEventArgs $event)
+    {
+        $currentTime = new \DateTime();
+
+        $this
+            ->setCreatedAt($currentTime)
+            ->setModifiedAt($currentTime);
+    }
+
+    /**
+     * Called before saving (each time)
+     *
+     * @ORM\PreUpdate
+     *
+     * @param LifecycleEventArgs $event
+     */
+    public function preUpdate(LifecycleEventArgs $event)
+    {
+        $currentTime = new \DateTime();
+
+        $this->setModifiedAt($currentTime);
     }
 }

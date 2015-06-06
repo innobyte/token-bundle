@@ -50,14 +50,14 @@ If none is provided, "default" will be used.
     );
 
 ## Validate token and consume it
-    $validToken = $this->get('innobyte_token')->consume(
+    $isValidToken = $this->get('innobyte_token')->consume(
         '5c15e262c692dbaac75451dcb28282ab',
         'scope',
         'owner_type',
         123            // owner_id
     );
 
-    if (!$validToken) {
+    if (!$isValidToken) {
         echo 'handle invalid token here';
     } else {
         echo 'do stuff here...';
