@@ -366,7 +366,7 @@ class Token
      *
      * @return Token
      */
-    public function setExpiresAt($expiresAt)
+    public function setExpiresAt(\DateTime $expiresAt)
     {
         $this->expiresAt = $expiresAt;
 

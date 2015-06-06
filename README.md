@@ -23,10 +23,14 @@ Add the following line into `$bundles` array:
 Add the mapping for the bundle under an entity manager (here "default")
 
     doctrine:
+        ...
         orm:
+            ...
             entity_managers:
                 default:
+                    ...
                     mappings:
+                        ...
                         InnobyteTokenBundle: ~
 
 ## paramaters.yml - Add the entity manager name
@@ -35,14 +39,14 @@ Add the entity manager name (here "local") - the one you put the mapping under i
 If none is provided, "default" will be used.
 
     innobyte_token:
-        entity_manager: local
+        entity_manager: default
 
 
 # Usage
 
 ## Generate token
 
-    /** @var Token $token */
+    /** @var \Innobyte\TokenBundle\Exception\Token $token */
     $token = $this->get('innobyte_token')->generate(
         'scope',
         'owner_type',
@@ -50,18 +54,22 @@ If none is provided, "default" will be used.
     );
 
 ## Validate token and consume it
-    $isValidToken = $this->get('innobyte_token')->consume(
-        '5c15e262c692dbaac75451dcb28282ab',
-        'scope',
-        'owner_type',
-        123            // owner_id
-    );
-
-    if (!$isValidToken) {
-        echo 'handle invalid token here';
-    } else {
-        echo 'do stuff here...';
+    try {
+        $this->get('innobyte_token')->consume(
+            '19debf971fb937853d77fca8fd3bb775',
+            'scope',
+            'owner_type',
+            123            // owner_id
+        );
+    } catch (\Innobyte\TokenBundle\Exception\TokenNotFoundException $e) {
+        echo 'Handle Token not found here';
+    } catch (\Innobyte\TokenBundle\Exception\TokenInactiveException $e) {
+        echo 'Handle explicit disabled token here';
+    } catch (\Innobyte\TokenBundle\Exception\TokenConsumedException $e) {
+        echo 'Handle explicit over-used token here';
     }
+
+    echo 'Token is valid. Token is valid. Perform logic here.';
 
 ## Get the token and manually validate it
     $token = $this->get('innobyte_token')->get(
@@ -72,37 +80,48 @@ If none is provided, "default" will be used.
     );
 
     // if wrong link or disabled/overused token
-    if (!$this->get('innobyte_token')->isValid($token)) {
-        echo 'handle invalid token here';
+    if (!$token instanceof \Innobyte\TokenBundle\Entity\Token || !$this->get('innobyte_token')->isValid($token)) {
+        echo 'Handle invalid token here';
     }
 
     // or even more explicit
-
-    if (!($token instanceof \Innobyte\TokenBundle\Entity\Token)) {
+    if (!$token instanceof \Innobyte\TokenBundle\Entity\Token) {
         echo 'handle invalid token here';
     } else {
-        if (!$token->isActive()) {
-            echo 'handle explicit disabled token here';
-        }
-
-        if ($token->getUsesCount() >= $token->getUsesMax()) {
-            echo 'handle explicit over-used token here';
-        }
-
         // manually mark the usage
-        $this->get('innobyte_token')->consumeToken($token);
+        try {
+            $this->get('innobyte_token')->consumeToken($token);
+        } catch (\LogicException $e) {
+            echo 'Cannot consume Token because it is not managed';
+        } catch (\Innobyte\TokenBundle\Exception\TokenInactiveException $e) {
+            echo 'Handle explicit disabled token here';
+        } catch (\Innobyte\TokenBundle\Exception\TokenConsumedException $e) {
+            echo 'Handle explicit over-used token here';
+        }
 
-        echo 'do stuff here...';
+        echo 'Token is valid. Perform logic here.';
     }
 
 ## Invalidate
 Similar methods to "consume" are available for invalidation: "invalidate" (disable the token)
 
-    $this->get('innobyte_token')->invalidate(
+    try {
+        $this->get('innobyte_token')->invalidate(
             '5c15e262c692dbaac75451dcb28282ab',
             'scope',
             'owner_type',
             123            // owner_id
         );
+    } catch (\Innobyte\TokenBundle\Exception\TokenNotFoundException $e) {
+        echo 'Handle Token not found here';
+    }
 
-    $this->get('innobyte_token')->invalidateToken($token);
+    if (!$token instanceof \Innobyte\TokenBundle\Entity\Token) {
+        echo 'Handle invalid token here';
+    } else {
+        try {
+            $this->get('innobyte_token')->invalidateToken($token);
+        } catch (\LogicException $e) {
+            echo 'Cannot consume Token because it is not managed';
+        }
+    }

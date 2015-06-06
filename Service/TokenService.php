@@ -2,10 +2,22 @@
 
 namespace Innobyte\TokenBundle\Service;
 
+use Doctrine\ORM\UnitOfWork;
+use Innobyte\TokenBundle\Exception\TokenConsumedException;
+use Innobyte\TokenBundle\Exception\TokenInactiveException;
+use Innobyte\TokenBundle\Exception\TokenNotFoundException;
 use Symfony\Component\DependencyInjection\Container;
 use Doctrine\ORM\EntityManager;
 use Innobyte\TokenBundle\Entity\Token;
 
+/**
+ * Class TokenService
+ * Token Manager class
+ *
+ * @package Innobyte\TokenBundle\Service
+ *
+ * @author  Sorin Dumitrescu <sorin.dumitrescu@innobyte.com>
+ */
 class TokenService
 {
     /** @var EntityManager */
@@ -59,7 +71,7 @@ class TokenService
             $token->setData($data);
         }
 
-        if (!empty($expiresAt)) {
+        if ($expiresAt instanceof \DateTime) {
             $token->setExpiresAt($expiresAt);
         }
 
@@ -108,37 +120,47 @@ class TokenService
     /**
      * Increase use count for the token matching the given criteria (if it exists and is valid)
      *
-     * @param string $hash
+     * @param string  $hash
      * @param string  $scope
      * @param string  $ownerType
      * @param integer $ownerId
      *
-     * @return boolean
+     * @throws TokenNotFoundException When the Token is not found by hash
+     * @throws TokenInactiveException When the Token is not active
+     * @throws TokenConsumedException When the Token is already consumed
      */
     public function consume($hash, $scope, $ownerType, $ownerId)
     {
         $token = $this->get($hash, $scope, $ownerType, $ownerId);
 
-        if (!($token instanceof Token)) {
-            return false;
+        if (!$token instanceof Token) {
+            throw new TokenNotFoundException(sprintf('A Token was not found for hash "%s".', $hash));
         }
 
-        if (!$token->isActive() || $token->getUsesCount() >= $token->getUsesMax()) {
-            return false;
+        if (!$token->isActive()) {
+            throw new TokenInactiveException(sprintf('Token "%s" is not active.', $hash));
+        }
+
+        if ($token->getUsesCount() >= $token->getUsesMax()) {
+            throw new TokenConsumedException(sprintf('Token "%s" is already consumed.', $hash));
         }
 
         $this->consumeToken($token);
-
-        return true;
     }
 
     /**
      * Consume the given Token
      *
      * @param Token $token
+     *
+     * @throws \LogicException When a not managed Token is being consumed
      */
     public function consumeToken(Token $token)
     {
+        if ($this->getEm()->getUnitOfWork()->getEntityState($token) != UnitOfWork::STATE_MANAGED) {
+            throw new \LogicException('The Token must be managed by Doctrine in order to be consumed.');
+        }
+
         $token->setUsesCount(
             $token->getUsesCount() + 1
         );
@@ -149,14 +171,20 @@ class TokenService
     /**
      * Invalidate the token matching the given criteria
      *
-     * @param string $hash
+     * @param string  $hash
      * @param string  $scope
      * @param string  $ownerType
      * @param integer $ownerId
+     *
+     * @throws TokenNotFoundException When the Token is not found by hash
      */
     public function invalidate($hash, $scope, $ownerType, $ownerId)
     {
         $token = $this->get($hash, $scope, $ownerType, $ownerId);
+
+        if (!$token instanceof Token) {
+            throw new TokenNotFoundException(sprintf('A Token was not found for hash "%s".', $hash));
+        }
 
         $this->invalidateToken($token);
     }
@@ -165,9 +193,15 @@ class TokenService
      * Invalidates the given Token
      *
      * @param Token $token
+     *
+     * @throws \LogicException When a not managed Token is being consumed
      */
     public function invalidateToken(Token $token)
     {
+        if ($this->getEm()->getUnitOfWork()->getEntityState($token) != UnitOfWork::STATE_MANAGED) {
+            throw new \LogicException('The Token must be managed by Doctrine in order to be consumed.');
+        }
+
         $token->setActive(false);
 
         $this->getEm()->flush($token);
