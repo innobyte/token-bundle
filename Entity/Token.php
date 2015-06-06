@@ -6,11 +6,23 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Token
+ * Class Token
+ * Token representation
+ * Properties are ordered by the following criteria, in order to make the resulting table faster to traverse:
+ * - first, fixed-length not nullable columns (integers and dates)
+ * - then, variable-length not nullable columns (varchars)
+ * - after these, fixed-length nullable columns (integers and dates)
+ * - then, variable-length nullable columns (varchars)
+ * - last, the text fields, which are worst in terms of predicting field length
+ * Please take this criteria into consideration when adding new fields.
  *
  * @ORM\Table("token")
  * @ORM\Entity(repositoryClass="Innobyte\TokenBundle\Repository\TokenRepository")
  * @ORM\HasLifecycleCallbacks
+ *
+ * @package Innobyte\TokenBundle\Entity
+ *
+ * @author  Sorin Dumitrescu <sorin.dumitrescu@innobyte.com>
  */
 class Token
 {
@@ -24,32 +36,11 @@ class Token
     protected $id;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="owner_type", type="string", length=20)
-     */
-    protected $ownerType;
-
-    /**
      * @var integer
      *
      * @ORM\Column(name="owner_id", type="integer")
      */
     protected $ownerId;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="scope", type="string", length=20)
-     */
-    protected $scope;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="hash", type="string", length=32)
-     */
-    protected $hash;
 
     /**
      * @var integer
@@ -64,13 +55,6 @@ class Token
      * @ORM\Column(name="uses_count", type="integer")
      */
     protected $usesCount;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="data", type="text", nullable=true)
-     */
-    protected $data;
 
     /**
      * @var boolean
@@ -94,11 +78,39 @@ class Token
     protected $modifiedAt;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="owner_type", type="string", length=20)
+     */
+    protected $ownerType;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="scope", type="string", length=20)
+     */
+    protected $scope;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="hash", type="string", length=32)
+     */
+    protected $hash;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="expires_at", type="datetime", nullable=true)
      */
     protected $expiresAt;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="data", type="text", nullable=true)
+     */
+    protected $data;
 
     /**
      * Initialize values
@@ -120,7 +132,7 @@ class Token
     }
 
     /**
-     * Set ownerType
+     * Set owner type
      *
      * @param string $ownerType
      *
@@ -134,7 +146,7 @@ class Token
     }
 
     /**
-     * Get ownerType
+     * Get owner type
      *
      * @return string
      */
@@ -144,7 +156,7 @@ class Token
     }
 
     /**
-     * Set ownerId
+     * Set owner ID
      *
      * @param integer $ownerId
      *
@@ -158,7 +170,7 @@ class Token
     }
 
     /**
-     * Get ownerId
+     * Get owner ID
      *
      * @return integer
      */
@@ -216,7 +228,7 @@ class Token
     }
 
     /**
-     * Set usesMax
+     * Set max uses
      *
      * @param integer $usesMax
      *
@@ -230,7 +242,7 @@ class Token
     }
 
     /**
-     * Get usesMax
+     * Get max uses
      *
      * @return integer
      */
@@ -240,7 +252,7 @@ class Token
     }
 
     /**
-     * Set usesCount
+     * Set number of uses
      *
      * @param integer $usesCount
      *
@@ -254,7 +266,7 @@ class Token
     }
 
     /**
-     * Get usesCount
+     * Get number of uses
      *
      * @return integer
      */
@@ -264,7 +276,7 @@ class Token
     }
 
     /**
-     * Set data
+     * Set additional data
      *
      * @param string $data
      *
@@ -278,7 +290,7 @@ class Token
     }
 
     /**
-     * Get data
+     * Get additional data
      *
      * @return string
      */
@@ -288,7 +300,7 @@ class Token
     }
 
     /**
-     * Set active
+     * Set active flag
      *
      * @param boolean $active
      *
@@ -302,7 +314,7 @@ class Token
     }
 
     /**
-     * Get active
+     * Get active flag
      *
      * @return boolean
      */
@@ -312,11 +324,11 @@ class Token
     }
 
     /**
-     * Set createdAt
+     * Set created at
      *
      * @param \DateTime $createdAt
      *
-     * @return $this
+     * @return Token
      */
     public function setCreatedAt(\DateTime $createdAt)
     {
@@ -326,7 +338,7 @@ class Token
     }
 
     /**
-     * Get createdAt
+     * Get created at
      *
      * @return \DateTime
      */
@@ -336,11 +348,11 @@ class Token
     }
 
     /**
-     * Set modifiedAt
+     * Set modified at
      *
      * @param \DateTime $modifiedAt
      *
-     * @return $this
+     * @return Token
      */
     public function setModifiedAt(\DateTime $modifiedAt)
     {
@@ -350,7 +362,7 @@ class Token
     }
 
     /**
-     * Get modifiedAt
+     * Get modified at
      *
      * @return \DateTime
      */
@@ -360,7 +372,7 @@ class Token
     }
 
     /**
-     * Set expiresAt
+     * Set expires at
      *
      * @param \DateTime $expiresAt
      *
@@ -374,7 +386,7 @@ class Token
     }
 
     /**
-     * Get expiresAt
+     * Get expires at
      *
      * @return \DateTime
      */
