@@ -20,14 +20,15 @@ Add the following line into `$bundles` array:
 
 ## config.yml - Add bundle mapping
 
-Add the mapping for the bundle under an entity manager (here "default")
+Add the mapping for the bundle under an entity manager (here "local").
+Note: "default" is the default name for the Entity Manager, if not specified otherwise.
 
     doctrine:
         ...
         orm:
             ...
             entity_managers:
-                default:
+                local:
                     ...
                     mappings:
                         ...
@@ -37,10 +38,17 @@ Add the mapping for the bundle under an entity manager (here "default")
 
 Add the entity manager name (here "local") - the one you put the mapping under in the above step.
 If none is provided, "default" will be used.
+Note: this must be specified only if the entity manager name is different than "default". Otherwise, this step can be omitted entirely.
 
     innobyte_token:
-        entity_manager: default
+        entity_manager: local
 
+
+## Update schema
+
+First, run ```app/console doctrine:schema:update --em=default --dump-sql``` to see the generated SQL.
+
+Then, run ```app/console doctrine:schema:update --em=default --force``` to run the query on the Database.
 
 # Usage
 

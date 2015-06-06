@@ -5,9 +5,10 @@ services:
     innobyte_token.token:
         class: %innobyte_token.token.class%
         arguments:
-            - @service_container
+            - @service_container                           # used only for getting the right Entity Manager
             - %innobyte_token.entity_manager_service_name%
         lazy: true
 
+    # shorthand name
     innobyte_token:
         alias: innobyte_token.token

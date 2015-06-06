@@ -16,18 +16,20 @@ use Innobyte\TokenBundle\Entity\Token;
  *
  * @package Innobyte\TokenBundle\Service
  *
- * @author  Sorin Dumitrescu <sorin.dumitrescu@innobyte.com>
+ * @author Sorin Dumitrescu <sorin.dumitrescu@innobyte.com>
  */
 class TokenService
 {
-    /** @var EntityManager */
+    /**
+     * @var EntityManager
+     */
     protected $em;
 
     /**
      * Initialize
      *
-     * @param Container $container
-     * @param string    $emName
+     * @param Container $container DI Container - used only for getting the right Entity Manager
+     * @param string    $emName    Name of the Entity Manager to fetch
      */
     public function __construct(Container $container, $emName)
     {
@@ -47,12 +49,12 @@ class TokenService
     /**
      * Generate a new token and persist it into DB
      *
-     * @param string       $scope
-     * @param string       $ownerType
-     * @param integer      $ownerId
-     * @param integer      $usesMax
-     * @param \DateTime    $expiresAt
-     * @param object|array $data
+     * @param string       $scope     Purpose of this token (where will it be used)
+     * @param string       $ownerType Owner of this entity (could be an Entity class name)
+     * @param integer      $ownerId   Identifier of the owner
+     * @param integer      $usesMax   Maximum number of uses for this Token before it is invalidated
+     * @param \DateTime    $expiresAt Optional expiry time, after which the Token becomes invalid
+     * @param object|array $data      Optional additional data to check against, for advanced validation conditions
      *
      * @return Token
      */
@@ -83,11 +85,13 @@ class TokenService
 
     /**
      * Retrieve the Token by given criteria
+     * Hash is used to find the Token
+     * The rest of the criteria is an embedded validation (filtering criteria)
      *
-     * @param string  $hash
-     * @param string  $scope
-     * @param string  $ownerType
-     * @param integer $ownerId
+     * @param string  $hash      Unique hash by which to retrieve the Token
+     * @param string  $scope     Purpose of this token (where will it be used)
+     * @param string  $ownerType Owner of this entity (could be an Entity class name)
+     * @param integer $ownerId   Identifier of the owner
      *
      * @return Token|null
      */
@@ -118,12 +122,13 @@ class TokenService
     }
 
     /**
-     * Increase use count for the token matching the given criteria (if it exists and is valid)
+     * Increase use count for the Token matching the given criteria (if it exists and is valid)
+     * Does not check if the Token can be consumed or not - this check must be performed before calling consume()
      *
-     * @param string  $hash
-     * @param string  $scope
-     * @param string  $ownerType
-     * @param integer $ownerId
+     * @param string  $hash      Unique hash by which to retrieve the Token
+     * @param string  $scope     Purpose of this token (where will it be used)
+     * @param string  $ownerType Owner of this entity (could be an Entity class name)
+     * @param integer $ownerId   Identifier of the owner
      *
      * @throws TokenNotFoundException When the Token is not found by hash
      * @throws TokenInactiveException When the Token is not active
@@ -149,9 +154,10 @@ class TokenService
     }
 
     /**
-     * Consume the given Token
+     * Increase use count for the given Token
+     * Does not check if the Token can be consumed or not - this check must be performed before calling consume()
      *
-     * @param Token $token
+     * @param Token $token The Token entity
      *
      * @throws \LogicException When a not managed Token is being consumed
      */
@@ -169,12 +175,14 @@ class TokenService
     }
 
     /**
-     * Invalidate the token matching the given criteria
+     * Invalidate the Token matching the given criteria
+     * Hash is used to find the Token
+     * The rest of the criteria is an embedded validation (filtering criteria)
      *
-     * @param string  $hash
-     * @param string  $scope
-     * @param string  $ownerType
-     * @param integer $ownerId
+     * @param string  $hash      Unique hash by which to retrieve the Token
+     * @param string  $scope     Purpose of this token (where will it be used)
+     * @param string  $ownerType Owner of this entity (could be an Entity class name)
+     * @param integer $ownerId   Identifier of the owner
      *
      * @throws TokenNotFoundException When the Token is not found by hash
      */
@@ -190,9 +198,9 @@ class TokenService
     }
 
     /**
-     * Invalidates the given Token
+     * Invalidate the given Token
      *
-     * @param Token $token
+     * @param Token $token The Token entity
      *
      * @throws \LogicException When a not managed Token is being consumed
      */

@@ -8,7 +8,12 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
 
 /**
- * This is the class that loads and manages your bundle configuration
+ * Class InnobyteTokenExtension
+ * Loads and manages bundle configuration
+ *
+ * @package Innobyte\TokenBundle\DependencyInjection
+ *
+ * @author Sorin Dumitrescu <sorin.dumitrescu@innobyte.com>
  */
 class InnobyteTokenExtension extends Extension
 {
@@ -25,7 +30,7 @@ class InnobyteTokenExtension extends Extension
             sprintf('doctrine.orm.%s_entity_manager', $config['entity_manager'])
         );
 
-        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yml');
     }
 }
