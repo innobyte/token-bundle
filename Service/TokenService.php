@@ -4,6 +4,7 @@ namespace Innobyte\TokenBundle\Service;
 
 use Doctrine\ORM\UnitOfWork;
 use Innobyte\TokenBundle\Exception\TokenConsumedException;
+use Innobyte\TokenBundle\Exception\TokenExpiredException;
 use Innobyte\TokenBundle\Exception\TokenInactiveException;
 use Innobyte\TokenBundle\Exception\TokenNotFoundException;
 use Symfony\Component\DependencyInjection\Container;
@@ -49,16 +50,16 @@ class TokenService
     /**
      * Generate a new token and persist it into DB
      *
-     * @param string       $scope     Purpose of this token (where will it be used)
-     * @param string       $ownerType Owner of this entity (could be an Entity class name)
-     * @param integer      $ownerId   Identifier of the owner
-     * @param integer      $usesMax   Maximum number of uses for this Token before it is invalidated
-     * @param \DateTime    $expiresAt Optional expiry time, after which the Token becomes invalid
-     * @param object|array $data      Optional additional data to check against, for advanced validation conditions
+     * @param string    $scope     Purpose of this token (where will it be used)
+     * @param string    $ownerType Owner of this entity (could be an Entity class name)
+     * @param integer   $ownerId   Identifier of the owner
+     * @param integer   $usesMax   Maximum number of uses for this Token before it is invalidated
+     * @param \DateTime $expiresAt Optional expiry time, after which the Token becomes invalid
+     * @param array     $data      Optional additional data to check against, for advanced validation conditions
      *
      * @return Token
      */
-    public function generate($scope, $ownerType, $ownerId, $usesMax = 1, \DateTime $expiresAt = null, $data = null)
+    public function generate($scope, $ownerType, $ownerId, $usesMax = 1, \DateTime $expiresAt = null, array $data = null)
     {
         $hash = md5(uniqid() . $scope . $ownerType . $ownerId);
 
@@ -118,7 +119,13 @@ class TokenService
      */
     public function isValid(Token $token = null)
     {
-        return ($token instanceof Token) && $token->isActive() && ($token->getUsesCount() < $token->getUsesMax());
+        $currentTime = new \DateTime();
+        $expiryTime  = $token->getExpiresAt();
+
+        return ($token instanceof Token)
+            && $token->isActive()
+            && ($token->getUsesCount() < $token->getUsesMax())
+            && (!($expiryTime instanceof \DateTime) || $expiryTime->getTimestamp() >= $currentTime->getTimestamp());
     }
 
     /**
@@ -133,6 +140,7 @@ class TokenService
      * @throws TokenNotFoundException When the Token is not found by hash
      * @throws TokenInactiveException When the Token is not active
      * @throws TokenConsumedException When the Token is already consumed
+     * @throws TokenExpiredException  When the Token is expired
      */
     public function consume($hash, $scope, $ownerType, $ownerId)
     {
@@ -148,6 +156,13 @@ class TokenService
 
         if ($token->getUsesCount() >= $token->getUsesMax()) {
             throw new TokenConsumedException(sprintf('Token "%s" is already consumed.', $hash));
+        }
+
+        if (($expiryTime = $token->getExpiresAt()) instanceof \DateTime) {
+            $currentTime = new \DateTime();
+            if ($expiryTime->getTimestamp() < $currentTime->getTimestamp()) {
+                throw new TokenExpiredException(sprintf('Token "%s" is expired.', $hash));
+            }
         }
 
         $this->consumeToken($token);

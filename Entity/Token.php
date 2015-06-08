@@ -108,7 +108,7 @@ class Token
     /**
      * @var string
      *
-     * @ORM\Column(name="data", type="text", nullable=true)
+     * @ORM\Column(name="data", type="array", nullable=true)
      */
     protected $data;
 
@@ -278,11 +278,11 @@ class Token
     /**
      * Set additional data
      *
-     * @param string $data
+     * @param array $data
      *
      * @return Token
      */
-    public function setData($data)
+    public function setData(array $data)
     {
         $this->data = $data;
 
@@ -292,7 +292,7 @@ class Token
     /**
      * Get additional data
      *
-     * @return string
+     * @return array
      */
     public function getData()
     {

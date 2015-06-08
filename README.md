@@ -54,12 +54,17 @@ Then, run ```app/console doctrine:schema:update --em=default --force``` to run t
 
 ## Generate token
 
-    /** @var \Innobyte\TokenBundle\Exception\Token $token */
     $token = $this->get('innobyte_token')->generate(
         'scope',
         'owner_type',
-        123            // owner_id
+        123,                       // owner_id
+        1,                         // number of uses - optional
+        new \DateTime('+1 day'),   // expiry time - optional
+        array('author' => 'admin') // additional data to check against - optional
     );
+
+    // use hash (embed in a link/email etc.)
+    $hash = $token->getHash();
 
 ## Validate token and consume it
     try {
@@ -70,11 +75,13 @@ Then, run ```app/console doctrine:schema:update --em=default --force``` to run t
             123            // owner_id
         );
     } catch (\Innobyte\TokenBundle\Exception\TokenNotFoundException $e) {
-        echo 'Handle Token not found here';
+        echo 'cannot consumed Token because it is not managed';
     } catch (\Innobyte\TokenBundle\Exception\TokenInactiveException $e) {
-        echo 'Handle explicit disabled token here';
+        echo 'handle explicit disabled token here';
     } catch (\Innobyte\TokenBundle\Exception\TokenConsumedException $e) {
-        echo 'Handle explicit over-used token here';
+        echo 'handle over-used token here';
+    } catch (\Innobyte\TokenBundle\Exception\TokenExpiredException $e) {
+        echo 'handle expired token here';
     }
 
     echo 'Token is valid. Token is valid. Perform logic here.';
@@ -100,11 +107,7 @@ Then, run ```app/console doctrine:schema:update --em=default --force``` to run t
         try {
             $this->get('innobyte_token')->consumeToken($token);
         } catch (\LogicException $e) {
-            echo 'Cannot consume Token because it is not managed';
-        } catch (\Innobyte\TokenBundle\Exception\TokenInactiveException $e) {
-            echo 'Handle explicit disabled token here';
-        } catch (\Innobyte\TokenBundle\Exception\TokenConsumedException $e) {
-            echo 'Handle explicit over-used token here';
+            echo 'cannot consumed Token because it is not managed';
         }
 
         echo 'Token is valid. Perform logic here.';
