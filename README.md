@@ -1,3 +1,9 @@
+# Purpose
+
+The goal of TokenBundle is to provide a means to validate actions taken by users.
+
+The validation is achieved by using a hash, which could, for example, be embedded in a URL, be it in an email or a link generated on-the-spot inside a page.
+
 # Installation
 
 ## composer.json - install bundle
@@ -9,7 +15,7 @@
         }
     ],
     "require": {
-        "innobyte/token-bundle": "@dev",
+        "innobyte/token-bundle": "~1.0",
     },
 
 ## AppKernel.php - register bundle
@@ -75,7 +81,7 @@ Then, run ```app/console doctrine:schema:update --em=default --force``` to run t
             123            // owner_id
         );
     } catch (\Innobyte\TokenBundle\Exception\TokenNotFoundException $e) {
-        echo 'cannot consumed Token because it is not managed';
+        echo 'cannot find Token';
     } catch (\Innobyte\TokenBundle\Exception\TokenInactiveException $e) {
         echo 'handle explicit disabled token here';
     } catch (\Innobyte\TokenBundle\Exception\TokenConsumedException $e) {
@@ -86,7 +92,7 @@ Then, run ```app/console doctrine:schema:update --em=default --force``` to run t
 
     echo 'Token is valid. Token is valid. Perform logic here.';
 
-## Get the token and manually validate it
+## Get the token and manually validate and consume it
     $token = $this->get('innobyte_token')->get(
         '5c15e262c692dbaac75451dcb28282ab',
         'scope',
@@ -95,7 +101,7 @@ Then, run ```app/console doctrine:schema:update --em=default --force``` to run t
     );
 
     // if wrong link or disabled/overused token
-    if (!$token instanceof \Innobyte\TokenBundle\Entity\Token || !$this->get('innobyte_token')->isValid($token)) {
+    if (!$this->get('innobyte_token')->isValid($token)) {
         echo 'Handle invalid token here';
     }
 
@@ -135,4 +141,39 @@ Similar methods to "consume" are available for invalidation: "invalidate" (disab
         } catch (\LogicException $e) {
             echo 'Cannot consume Token because it is not managed';
         }
+    }
+
+## Advanced validation
+Additional data can be used in validating additional conditions after performing the standard Token validation.
+
+    // first, generate the Token
+    $token = $this->get('innobyte_token')->generate(
+        'scope',
+        'owner_type',
+        123,                       // owner_id
+        1,                         // number of uses - optional
+        new \DateTime('+1 hour'),   // expiry time - optional
+        array('ip' => $request->getClientIp()) // additional data to check against - optional
+    );
+
+    // use hash (embed in a link/email etc.)
+    $hash = $token->getHash();
+    
+    // then, validate it
+    $token = $this->get('innobyte_token')->get(
+        $hash,
+        'scope',
+        'owner_type',
+        123            // owner_id
+    );
+
+    // if wrong link or disabled/overused token
+    if (!$this->get('innobyte_token')->isValid($token)) {
+        echo 'Handle invalid token here';
+    }
+    
+    // additional validation by IP
+    $additionalData = $token->getData();
+    if ($additionalData['ip'] != $request->getClientIp()) {
+        echo 'Handle invalid token here';
     }

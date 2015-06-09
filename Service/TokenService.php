@@ -119,11 +119,14 @@ class TokenService
      */
     public function isValid(Token $token = null)
     {
+        if (!($token instanceof Token)) {
+            return false;
+        }
+
         $currentTime = new \DateTime();
         $expiryTime  = $token->getExpiresAt();
 
-        return ($token instanceof Token)
-            && $token->isActive()
+        return $token->isActive()
             && ($token->getUsesCount() < $token->getUsesMax())
             && (!($expiryTime instanceof \DateTime) || $expiryTime->getTimestamp() >= $currentTime->getTimestamp());
     }

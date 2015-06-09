@@ -22,7 +22,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @package Innobyte\TokenBundle\Entity
  *
- * @author  Sorin Dumitrescu <sorin.dumitrescu@innobyte.com>
+ * @author Sorin Dumitrescu <sorin.dumitrescu@innobyte.com>
  */
 class Token
 {
