@@ -83,14 +83,14 @@ class TokenServiceTest extends WebTestCase
         $this->assertEquals($token->getUsesMax(), $usesMax, 'Max uses is not the same as set');
         $this->assertInstanceOf('\\DateTime', $token->getExpiresAt(), '$expiresAt is not a DateTime');
         $this->assertEquals($token->getExpiresAt(), $expiryTime, '$expiresAt is not the same as set');
-        $this->assertArrayHasKey($dataKey, $token->getData());
-        $this->assertEquals($token->getData(), $data);
+        $this->assertArrayHasKey($dataKey, $token->getData(), 'Data is not the same as set');
+        $this->assertEquals($token->getData(), $data, 'Data is not the same as set');
 
         $hash = $token->getHash();
 
-        $this->assertNotEmpty($hash);
-        $this->assertEquals(32, strlen($hash));
-        $this->assertGreaterThan(0, $token->getId());
+        $this->assertNotEmpty($hash, 'Hash is empty');
+        $this->assertEquals(32, strlen($hash), 'Hash length is not consistent with md5');
+        $this->assertGreaterThan(0, $token->getId(), 'Token ID was not populated');
 
         return $token;
     }
@@ -141,9 +141,9 @@ class TokenServiceTest extends WebTestCase
 
         $hash = $token->getHash();
 
-        $this->assertNotEmpty($hash);
-        $this->assertEquals(32, strlen($hash));
-        $this->assertGreaterThan(0, $token->getId());
+        $this->assertNotEmpty($hash, 'Hash is empty');
+        $this->assertEquals(32, strlen($hash), 'Hash length is not consistent with md5');
+        $this->assertGreaterThan(0, $token->getId(), 'Token ID was not populated');
 
         return $token;
     }
@@ -194,7 +194,11 @@ class TokenServiceTest extends WebTestCase
             'Max uses is not the same as set'
         );
         $this->assertInstanceOf('\\DateTime', $retrievedToken->getExpiresAt(), '$expiresAt is not a DateTime');
-        $this->assertEquals($generatedToken->getExpiresAt(), $retrievedToken->getExpiresAt());
+        $this->assertEquals(
+            $generatedToken->getExpiresAt(),
+            $retrievedToken->getExpiresAt(),
+            '$expiresAt is not the same as set'
+        );
         $this->assertEquals($generatedToken->getData(), $retrievedToken->getData(), '$data is not the same as set');
     }
 
@@ -252,7 +256,10 @@ class TokenServiceTest extends WebTestCase
      */
     public function testIsValidPassWithoutExpiry(Token $generatedToken)
     {
-        $this->assertTrue($this->tokenService->isValid($generatedToken));
+        $this->assertTrue(
+            $this->tokenService->isValid($generatedToken),
+            'Expected valid Token without expiry is not valid.'
+        );
     }
 
     /**
@@ -264,15 +271,18 @@ class TokenServiceTest extends WebTestCase
      */
     public function testIsValidPassWithExpiry(Token $generatedToken)
     {
-        $this->assertTrue($this->tokenService->isValid($generatedToken));
+        $this->assertTrue(
+            $this->tokenService->isValid($generatedToken),
+            'Expected valid Token with expiry is not valid.'
+        );
     }
 
     /**
-     * Test with not Token
+     * Test with no Token
      */
     public function testIsValidFailToken()
     {
-        $this->assertFalse($this->tokenService->isValid(null));
+        $this->assertFalse($this->tokenService->isValid(null), 'No Token passed token validation');
     }
 
     /**
@@ -287,7 +297,7 @@ class TokenServiceTest extends WebTestCase
         $inactiveToken = clone $generatedToken;
         $inactiveToken->setActive(false);
 
-        $this->assertFalse($this->tokenService->isValid($inactiveToken));
+        $this->assertFalse($this->tokenService->isValid($inactiveToken), 'Inactive Token passed validation');
     }
 
     /**
@@ -302,7 +312,7 @@ class TokenServiceTest extends WebTestCase
         $overusedToken = clone $generatedToken;
         $overusedToken->setUsesCount($generatedToken->getUsesMax() + 1);
 
-        $this->assertFalse($this->tokenService->isValid($overusedToken));
+        $this->assertFalse($this->tokenService->isValid($overusedToken), 'Overused Token passed validation');
     }
 
     /**
@@ -317,7 +327,7 @@ class TokenServiceTest extends WebTestCase
         $expiredToken = clone $generatedToken;
         $expiredToken->setExpiresAt(new \DateTime('5 minutes ago'));
 
-        $this->assertFalse($this->tokenService->isValid($expiredToken));
+        $this->assertFalse($this->tokenService->isValid($expiredToken), 'Expired Token passed validation');
     }
 
     /**
@@ -345,7 +355,7 @@ class TokenServiceTest extends WebTestCase
             $generatedToken->getOwnerId()
         );
 
-        $this->assertEquals($beforeUses + 1, $retrievedToken->getUsesCount());
+        $this->assertEquals($beforeUses + 1, $retrievedToken->getUsesCount(), 'Token was not consumed');
     }
 
     /**
@@ -458,7 +468,7 @@ class TokenServiceTest extends WebTestCase
 
         $this->tokenService->consumeToken($token);
 
-        $this->assertEquals($beforeUses + 1, $token->getUsesCount());
+        $this->assertEquals($beforeUses + 1, $token->getUsesCount(), 'Token was not consumed');
 
         $retrievedToken = $this->tokenService->get(
             $token->getHash(),
@@ -467,7 +477,7 @@ class TokenServiceTest extends WebTestCase
             $token->getOwnerId()
         );
 
-        $this->assertEquals($beforeUses + 1, $retrievedToken->getUsesCount());
+        $this->assertEquals($beforeUses + 1, $retrievedToken->getUsesCount(), 'Token was not consumed in Database');
     }
 
     /**
@@ -489,7 +499,7 @@ class TokenServiceTest extends WebTestCase
      */
     public function testInvalidatePass(Token $generatedToken)
     {
-        $this->assertTrue($generatedToken->isActive());
+        $this->assertTrue($generatedToken->isActive(), 'Expected active Token was inactive');
 
         $this->tokenService->invalidate(
             $generatedToken->getHash(),
@@ -505,7 +515,7 @@ class TokenServiceTest extends WebTestCase
             $generatedToken->getOwnerId()
         );
 
-        $this->assertFalse($retrievedToken->isActive());
+        $this->assertFalse($retrievedToken->isActive(), 'Token was not invalidated');
     }
 
     /**
@@ -538,11 +548,11 @@ class TokenServiceTest extends WebTestCase
             $ownerId
         );
 
-        $this->assertTrue($token->isActive());
+        $this->assertTrue($token->isActive(), 'Expected active Token was inactive');
 
         $this->tokenService->invalidateToken($token);
 
-        $this->assertFalse($token->isActive());
+        $this->assertFalse($token->isActive(), 'Token was not invalidated');
 
         $retrievedToken = $this->tokenService->get(
             $token->getHash(),
@@ -551,7 +561,7 @@ class TokenServiceTest extends WebTestCase
             $token->getOwnerId()
         );
 
-        $this->assertFalse($retrievedToken->isActive());
+        $this->assertFalse($retrievedToken->isActive(), 'Token was not invalidated in Database');
     }
 
     /**
