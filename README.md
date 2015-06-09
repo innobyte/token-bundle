@@ -8,12 +8,6 @@ The validation is achieved by using a hash, which could, for example, be embedde
 
 ## composer.json - install bundle
 
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "ssh://git@gitlab.devops.innobyte.ro/sorin.dumitrescu/token-bundle.git"
-        }
-    ],
     "require": {
         "innobyte/token-bundle": "~1.1",
     },
