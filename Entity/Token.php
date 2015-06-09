@@ -16,9 +16,14 @@ use Doctrine\ORM\Mapping as ORM;
  * - last, the text fields, which are worst in terms of predicting field length
  * Please take this criteria into consideration when adding new fields.
  *
- * @ORM\Table("token")
  * @ORM\Entity()
  * @ORM\HasLifecycleCallbacks
+ * @ORM\Table(
+ *     name = "token", indexes = {
+ *         @ORM\Index(name = "search_idx", columns = {"hash", "scope", "owner_type", "owner_id"}),
+ *         @ORM\Index(name = "hash_idx", columns = {"hash"})
+ *     }
+ * )
  *
  * @package Innobyte\TokenBundle\Entity
  *
