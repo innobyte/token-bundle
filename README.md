@@ -15,7 +15,7 @@ The validation is achieved by using a hash, which could, for example, be embedde
         }
     ],
     "require": {
-        "innobyte/token-bundle": "~1.0",
+        "innobyte/token-bundle": "~1.1",
     },
 
 ## AppKernel.php - register bundle
