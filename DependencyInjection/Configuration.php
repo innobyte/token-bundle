@@ -11,6 +11,8 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
  *
  * @package Innobyte\TokenBundle\DependencyInjection
  *
+ * @codeCoverageIgnore
+ *
  * @author Sorin Dumitrescu <sorin.dumitrescu@innobyte.com>
  */
 class Configuration implements ConfigurationInterface

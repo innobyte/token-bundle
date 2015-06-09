@@ -17,7 +17,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Please take this criteria into consideration when adding new fields.
  *
  * @ORM\Table("token")
- * @ORM\Entity(repositoryClass="Innobyte\TokenBundle\Repository\TokenRepository")
+ * @ORM\Entity()
  * @ORM\HasLifecycleCallbacks
  *
  * @package Innobyte\TokenBundle\Entity

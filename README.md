@@ -177,3 +177,17 @@ Additional data can be used in validating additional conditions after performing
     if ($additionalData['ip'] != $request->getClientIp()) {
         echo 'Handle invalid token here';
     }
+
+## Unit Testing
+Do not forget to override database credentials in ```config_test.yml``` with the test database ones. Example:
+
+    parameters:
+        database_host: 127.0.0.1
+        database_port: null
+        database_name: test_db
+        database_user: root
+        database_password: 123
+
+To run the tests, execute:
+
+    phpunit -c app/ vendor/innobyte/token-bundle/Innobyte/TokenBundle/Tests/

@@ -9,6 +9,8 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
  *
  * @package Innobyte\TokenBundle
  *
+ * @codeCoverageIgnore
+ *
  * @author  Sorin Dumitrescu <sorin.dumitrescu@innobyte.com>
  */
 class InnobyteTokenBundle extends Bundle

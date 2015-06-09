@@ -166,7 +166,9 @@ class TokenService
             if ($expiryTime->getTimestamp() < $currentTime->getTimestamp()) {
                 throw new TokenExpiredException(sprintf('Token "%s" is expired.', $hash));
             }
+        // @codeCoverageIgnoreStart
         }
+        // @codeCoverageIgnoreEnd
 
         $this->consumeToken($token);
     }

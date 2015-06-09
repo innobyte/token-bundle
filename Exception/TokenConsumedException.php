@@ -8,6 +8,8 @@ namespace Innobyte\TokenBundle\Exception;
  *
  * @package Innobyte\TokenBundle\Exception
  *
+ * @codeCoverageIgnore
+ *
  * @author Sorin Dumitrescu <sorin.dumitrescu@innobyte.com>
  */
 class TokenConsumedException extends \LogicException

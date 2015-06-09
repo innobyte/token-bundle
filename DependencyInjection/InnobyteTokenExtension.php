@@ -13,6 +13,8 @@ use Symfony\Component\DependencyInjection\Loader;
  *
  * @package Innobyte\TokenBundle\DependencyInjection
  *
+ * @codeCoverageIgnore
+ *
  * @author Sorin Dumitrescu <sorin.dumitrescu@innobyte.com>
  */
 class InnobyteTokenExtension extends Extension
