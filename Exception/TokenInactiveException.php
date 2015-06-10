@@ -12,6 +12,6 @@ namespace Innobyte\TokenBundle\Exception;
  *
  * @author Sorin Dumitrescu <sorin.dumitrescu@innobyte.com>
  */
-class TokenInactiveException extends \LogicException
+class TokenInactiveException extends TokenException
 {
 }

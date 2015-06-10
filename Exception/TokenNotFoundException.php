@@ -12,6 +12,6 @@ namespace Innobyte\TokenBundle\Exception;
  *
  * @author Sorin Dumitrescu <sorin.dumitrescu@innobyte.com>
  */
-class TokenNotFoundException extends \LogicException
+class TokenNotFoundException extends TokenException
 {
 }
