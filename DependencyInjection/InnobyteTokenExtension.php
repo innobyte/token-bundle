@@ -4,6 +4,7 @@ namespace Innobyte\TokenBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
 
@@ -27,10 +28,10 @@ class InnobyteTokenExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        $container->setParameter(
-            'innobyte_token.entity_manager_service_name',
-            sprintf('doctrine.orm.%s_entity_manager', $config['entity_manager'])
-        );
+        $container
+            ->getDefinition('innobyte_token.token')
+            ->replaceArgument(0, new Reference(sprintf('doctrine.orm.%s_entity_manager', $config['entity_manager'])))
+        ;
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yml');
