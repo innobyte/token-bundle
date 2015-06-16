@@ -82,6 +82,9 @@ Then, run ```app/console doctrine:schema:update --em=default --force``` to run t
         echo 'handle over-used token here';
     } catch (\Innobyte\TokenBundle\Exception\TokenExpiredException $e) {
         echo 'handle expired token here';
+    } catch (\Innobyte\TokenBundle\Exception\TokenException $e) {
+        // or, alternately, you can catch all token-related exceptions
+        echo 'handle all token-related exceptions';
     }
 
     echo 'Token is valid. Token is valid. Perform logic here.';

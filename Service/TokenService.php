@@ -2,14 +2,15 @@
 
 namespace Innobyte\TokenBundle\Service;
 
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\UnitOfWork;
 use Innobyte\TokenBundle\Exception\TokenConsumedException;
 use Innobyte\TokenBundle\Exception\TokenExpiredException;
 use Innobyte\TokenBundle\Exception\TokenInactiveException;
 use Innobyte\TokenBundle\Exception\TokenNotFoundException;
-use Symfony\Component\DependencyInjection\Container;
 use Doctrine\ORM\EntityManager;
 use Innobyte\TokenBundle\Entity\Token;
+use Symfony\Component\Security\Core\Util\SecureRandomInterface;
 
 /**
  * Class TokenService
@@ -21,30 +22,29 @@ use Innobyte\TokenBundle\Entity\Token;
  */
 class TokenService
 {
+    const ENTITY_NAME = 'InnobyteTokenBundle:Token';
+
     /**
      * @var EntityManager
      */
     protected $em;
 
+    /** @var EntityRepository */
+    protected $repository;
+
+    /** @var SecureRandomInterface */
+    protected $secureRandom;
+
     /**
      * Initialize
      *
-     * @param Container $container DI Container - used only for getting the right Entity Manager
-     * @param string    $emName    Name of the Entity Manager to fetch
+     * @param EntityManager $entityManager
      */
-    public function __construct(Container $container, $emName)
+    public function __construct(EntityManager $entityManager, SecureRandomInterface $secureRandom)
     {
-        $this->em = $container->get($emName);
-    }
-
-    /**
-     * Get the entity manager
-     *
-     * @return EntityManager
-     */
-    protected function getEm()
-    {
-        return $this->em;
+        $this->em = $entityManager;
+        $this->repository = $this->em->getRepository(self::ENTITY_NAME);
+        $this->secureRandom = $secureRandom;
     }
 
     /**
@@ -61,7 +61,7 @@ class TokenService
      */
     public function generate($scope, $ownerType, $ownerId, $usesMax = 1, \DateTime $expiresAt = null, array $data = null)
     {
-        $hash = md5(uniqid() . $scope . $ownerType . $ownerId);
+        $hash = md5($this->secureRandom->nextBytes(32) . $scope . $ownerType . $ownerId);
 
         $token = new Token();
         $token->setHash($hash)
@@ -78,8 +78,8 @@ class TokenService
             $token->setExpiresAt($expiresAt);
         }
 
-        $this->getEm()->persist($token);
-        $this->getEm()->flush($token);
+        $this->em->persist($token);
+        $this->em->flush($token);
 
         return $token;
     }
@@ -98,7 +98,7 @@ class TokenService
      */
     public function get($hash, $scope, $ownerType, $ownerId)
     {
-        $token = $this->getEm()->getRepository('InnobyteTokenBundle:Token')->findOneBy(
+        $token = $this->repository->findOneBy(
             array(
                 'hash'      => $hash,
                 'scope'     => $scope,
@@ -183,7 +183,7 @@ class TokenService
      */
     public function consumeToken(Token $token)
     {
-        if ($this->getEm()->getUnitOfWork()->getEntityState($token) != UnitOfWork::STATE_MANAGED) {
+        if ($this->em->getUnitOfWork()->getEntityState($token) != UnitOfWork::STATE_MANAGED) {
             throw new \LogicException('The Token must be managed by Doctrine in order to be consumed.');
         }
 
@@ -191,7 +191,7 @@ class TokenService
             $token->getUsesCount() + 1
         );
 
-        $this->getEm()->flush($token);
+        $this->em->flush($token);
     }
 
     /**
@@ -226,12 +226,12 @@ class TokenService
      */
     public function invalidateToken(Token $token)
     {
-        if ($this->getEm()->getUnitOfWork()->getEntityState($token) != UnitOfWork::STATE_MANAGED) {
+        if ($this->em->getUnitOfWork()->getEntityState($token) != UnitOfWork::STATE_MANAGED) {
             throw new \LogicException('The Token must be managed by Doctrine in order to be consumed.');
         }
 
         $token->setActive(false);
 
-        $this->getEm()->flush($token);
+        $this->em->flush($token);
     }
 }
