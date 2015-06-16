@@ -44,6 +44,7 @@ class TokenService
     {
         $this->em = $entityManager;
         $this->repository = $this->em->getRepository(self::ENTITY_NAME);
+        $this->secureRandom = $secureRandom;
     }
 
     /**

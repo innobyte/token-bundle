@@ -28,12 +28,12 @@ class InnobyteTokenExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
+        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $loader->load('services.yml');
+
         $container
             ->getDefinition('innobyte_token.token')
             ->replaceArgument(0, new Reference(sprintf('doctrine.orm.%s_entity_manager', $config['entity_manager'])))
         ;
-
-        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
-        $loader->load('services.yml');
     }
 }
