@@ -3,17 +3,17 @@
     "type": "symfony-bundle",
     "keywords": ["token", "hash", "generator"],
     "homepage": "http://www.innobyte.com/",
-    "description": "A Symfony2 Bundle implementing an access-based token system, with generation, validation and consumption mechanisms.",
+    "description": "A Symfony3 Bundle implementing an access-based token system, with generation, validation and consumption mechanisms.",
     "extra": {
         "branch-alias": {
-            "dev-master": "1.2.x-dev"
+            "dev-master": "master"
         }
     },
     "require": {
-        "php": ">5.3.3",
-        "symfony/symfony": ">=2.3",
-        "twig/twig": ">=1.10",
-        "doctrine/doctrine-bundle": ">=1.1"
+        "php": ">=7.0.0",
+        "symfony/symfony": "3.1.*",
+        "twig/twig": "~1.28|~2.0",
+        "doctrine/doctrine-bundle": "~1.4"
     },
     "autoload": {
         "psr-0": { "Innobyte\\TokenBundle": "" }
@@ -26,6 +26,6 @@
             "email": "sorin.dumitrescu@innobyte.com"
         }
     ],
-    "version": "1.1.0",
-    "minimum-stability": "stable"
+    "version": "2.0.0",
+    "minimum-stability": "dev"
 }

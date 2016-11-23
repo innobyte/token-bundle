@@ -6,7 +6,7 @@ services:
         class: %innobyte_token.token.class%
         arguments:
             - ~ # will be replaced with the entity manager set in config
-            - @security.secure_random
+            - '@security.secure_random'
         lazy: true
 
     # shorthand name
