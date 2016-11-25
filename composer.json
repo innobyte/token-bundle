@@ -6,7 +6,7 @@
     "description": "A Symfony3 Bundle implementing an access-based token system, with generation, validation and consumption mechanisms.",
     "extra": {
         "branch-alias": {
-            "dev-master": "master"
+            "dev-master": "2.x-dev"
         }
     },
     "require": {
