@@ -10,7 +10,6 @@ use Innobyte\TokenBundle\Exception\TokenInactiveException;
 use Innobyte\TokenBundle\Exception\TokenNotFoundException;
 use Doctrine\ORM\EntityManager;
 use Innobyte\TokenBundle\Entity\Token;
-use Symfony\Component\Security\Core\Util\SecureRandomInterface;
 
 /**
  * Class TokenService
@@ -32,19 +31,15 @@ class TokenService
     /** @var EntityRepository */
     protected $repository;
 
-    /** @var SecureRandomInterface */
-    protected $secureRandom;
-
     /**
      * Initialize
      *
      * @param EntityManager $entityManager
      */
-    public function __construct(EntityManager $entityManager, SecureRandomInterface $secureRandom)
+    public function __construct(EntityManager $entityManager)
     {
         $this->em = $entityManager;
         $this->repository = $this->em->getRepository(self::ENTITY_NAME);
-        $this->secureRandom = $secureRandom;
     }
 
     /**
@@ -61,7 +56,7 @@ class TokenService
      */
     public function generate($scope, $ownerType, $ownerId, $usesMax = 1, \DateTime $expiresAt = null, array $data = null)
     {
-        $hash = md5($this->secureRandom->nextBytes(32) . $scope . $ownerType . $ownerId);
+        $hash = md5(random_bytes(32) . $scope . $ownerType . $ownerId);
 
         $token = new Token();
         $token->setHash($hash)
