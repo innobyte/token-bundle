@@ -3,10 +3,9 @@ parameters:
 
 services:
     innobyte_token.token:
-        class: %innobyte_token.token.class%
+        class: '%innobyte_token.token.class%'
         arguments:
             - ~ # will be replaced with the entity manager set in config
-            - '@security.secure_random'
         lazy: true
 
     # shorthand name
