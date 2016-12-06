@@ -56,7 +56,7 @@ class TokenService
      */
     public function generate($scope, $ownerType, $ownerId, $usesMax = 1, \DateTime $expiresAt = null, array $data = null)
     {
-        $hash = md5(random_bytes(32) . $scope . $ownerType . $ownerId);
+        $hash = md5($this->legacyRandomBytes(32) . $scope . $ownerType . $ownerId);
 
         $token = new Token();
         $token->setHash($hash)
@@ -228,5 +228,49 @@ class TokenService
         $token->setActive(false);
 
         $this->em->flush($token);
+    }
+
+    /**
+     * Legacy method for the PHP7 random_bytes() function
+     *
+     * @param int $length
+     *
+     * @return string
+     */
+    protected function legacyRandomBytes($length = 32)
+    {
+        if (function_exists('random_bytes')) {
+            return random_bytes($length);
+        }
+        if (function_exists('mcrypt_create_iv')) {
+            return mcrypt_create_iv($length, MCRYPT_DEV_URANDOM);
+        }
+        if (function_exists('openssl_random_pseudo_bytes')) {
+            return openssl_random_pseudo_bytes($length);
+        }
+
+        return $this->dummyRandomBytes($length);
+    }
+
+    /**
+     * Dummy method for the PHP7 random_bytes() function
+     * Will be used in case you don't have PHP >= 7 installed nor the mcrypt library nor the openssl library.
+     * Warning: It is not a cryptographically secure pseudorandom string generator!
+     *
+     * @param int $length
+     *
+     * @return string
+     */
+    protected function dummyRandomBytes($length = 32)
+    {
+        $alphabet = 'abcde1234567890';
+        $pass = [];
+        $alphaLength = strlen($alphabet) - 1;
+        for ($i = 0; $i < 2 * $length; $i++) {
+            $n = rand(0, $alphaLength);
+            $pass[] = $alphabet[$n];
+        }
+
+        return hex2bin(implode($pass));
     }
 }
