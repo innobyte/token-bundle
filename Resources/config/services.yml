@@ -11,3 +11,6 @@ services:
     # shorthand name
     innobyte_token:
         alias: innobyte_token.token
+
+    Innobyte\TokenBundle\Service\TokenService:
+        alias: innobyte_token.token
